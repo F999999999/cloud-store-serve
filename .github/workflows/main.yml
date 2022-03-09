@@ -97,26 +97,20 @@ jobs:
           # rsync flags（默认值："-rltgoDzvO"）
           # --delete 删除那些目标目录中有而源目录中没有的多余文件
           # --exclude 排除目标目录中那些被该选项指定的文件
-          ARGS: "-rltgoDzvO --delete --exclude '.user.ini' --exclude '.env' --exclude 'deploy.sh'"
+          ARGS: "-rltgoDzvO --delete --exclude '.user.ini' --exclude '.env'"
 
       # 重载PM2
       - name: PM2 Reload 🔁
         # 构建
-        uses: appleboy/ssh-action@master
+        uses: fifsky/ssh-action@master
         with:
           # 服务器地址(IP或者域名)
           host: ${{ secrets.REMOTE_HOST }}
           # 服务器用户名
-          username: ${{ secrets.REMOTE_USER }}
+          user: ${{ secrets.REMOTE_USER }}
           # 服务器 SSH 私钥
           key: ${{ secrets.REMOTE_SSH_KEY }}
-          # 命令超时配置 默认10m
-          command_timeout: 20m
           # 运行在远程服务器的命令
           # 重载PM2
-          script: |
-            cd ${{ secrets.REMOTE_TARGET }}
-            ll
-            cd /www/wwwroot/cloudstore_serve
-            ll
-            source ./deploy.sh
+          command: |
+            pm2 reload all
