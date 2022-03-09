@@ -1,5 +1,5 @@
 # 工作流名称（默认值：配置文件名）
-name: GitHub Actions Deploy cloud-store main
+name: GitHub Actions Deploy cloud-store-serve main
 
 # 指定触发 工作流（workflow）的条件
 # 指定触发事件时，可以限定分支或标签
@@ -86,7 +86,7 @@ jobs:
       # 服务器PM2重载
       - name: PM2 Reload 🚀
         # 构建
-        uses: actions/ssg-actions@master
+        uses: appleboy/ssh-action@master
         with:
           # 服务器地址(IP或者域名)
           host: ${{ secrets.REMOTE_HOST }}
