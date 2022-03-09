@@ -116,4 +116,7 @@ jobs:
           # 重载PM2
           script: |
             cd ${{ secrets.REMOTE_TARGET }}
+            ll
+            cd /www/wwwroot/cloudstore_serve
+            ll
             source ./deploy.sh
