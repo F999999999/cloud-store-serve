@@ -99,18 +99,20 @@ jobs:
           # --exclude 排除目标目录中那些被该选项指定的文件
           ARGS: "-rltgoDzvO --delete --exclude '.user.ini' --exclude '.env'"
 
-      # 重载PM2
-      - name: PM2 Reload 🔁
-        # 构建
-        uses: fifsky/ssh-action@master
-        with:
-          # 服务器地址(IP或者域名)
-          host: ${{ secrets.REMOTE_HOST }}
-          # 服务器用户名
-          user: ${{ secrets.REMOTE_USER }}
-          # 服务器 SSH 私钥
-          key: ${{ secrets.REMOTE_SSH_KEY }}
-          # 运行在远程服务器的命令
-          # 重载PM2
-          command: |
-            /www/server/nvm/versions/node/v16.14.0/bin/pm2 reload all
+#      # 重载PM2
+#      - name: PM2 Reload 🔁
+#        # 构建
+#        uses: appleboy/ssh-action@master
+#        with:
+#          # 服务器地址(IP或者域名)
+#          host: ${{ secrets.REMOTE_HOST }}
+#          # 服务器用户名
+#          username: ${{ secrets.REMOTE_USER }}
+#          # 服务器 SSH 私钥
+#          key: ${{ secrets.REMOTE_SSH_KEY }}
+#          # 命令超时配置 默认10m
+#          command_timeout: 20m
+#          # 运行在远程服务器的命令
+#          # 重载PM2
+#          script: |
+#            pm2 reload all
