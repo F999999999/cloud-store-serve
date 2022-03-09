@@ -115,4 +115,5 @@ jobs:
           # 运行在远程服务器的命令
           # 重载PM2
           script: |
+            cd ${{ secrets.REMOTE_TARGET }}
             pm2 reload all
