@@ -114,5 +114,5 @@ jobs:
           # 重载PM2
           script: |
             export PATH=/www/server/nvm/versions/node/v16.14.0/bin:$PATH
-            cd /www/wwwroot/cloudstore_serve
+            cd ${{ secrets.REMOTE_TARGET }}
             pm2 reload ecosystem.config.js
