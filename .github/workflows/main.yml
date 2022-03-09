@@ -78,10 +78,6 @@ jobs:
         # 如果没有命中，则安装依赖
         run: yarn
 
-      # 运行构建脚本
-      - name: Build ⏳
-        run: npm run build
-
       # 部署到服务器
       - name: Deploy 🚀
         # 构建
@@ -97,7 +93,7 @@ jobs:
           # 服务器部署路径
           TARGET: ${{ secrets.REMOTE_TARGET }}
           # 源目录（打包的目录）
-          SOURCE: "dist/"
+          SOURCE: "/"
           # rsync flags（默认值："-rltgoDzvO"）
           # --delete 删除那些目标目录中有而源目录中没有的多余文件
           # --exclude 排除目标目录中那些被该选项指定的文件
