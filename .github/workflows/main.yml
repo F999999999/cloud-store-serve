@@ -80,11 +80,8 @@ jobs:
 
       # 运行构建脚本
       - name: Build ⏳
-        run: |
-          yarn build
-        env:
-          CI: true
-  
+        run: npm run build
+
       # 部署到服务器
       - name: Deploy 🚀
         # 构建
