@@ -116,5 +116,6 @@ jobs:
           # 安装node_modules
           # 重载PM2
           script: |
-            sudo npm install
-            sudo pm2 reload all
+            cd ${{ secrets.REMOTE_TARGET }}
+            /usr/local/bin/npm install
+            /usr/local/bin/pm2 reload all
