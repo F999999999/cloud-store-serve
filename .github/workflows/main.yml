@@ -113,5 +113,4 @@ jobs:
           # 运行在远程服务器的命令
           # 重载PM2
           command: |
-            cd /www/server/nvm/versions/node/v16.14.0/bin
-            pm2 reload all
+            /www/server/nvm/versions/node/v16.14.0/bin/pm2 reload all
