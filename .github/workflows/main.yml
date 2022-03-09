@@ -55,7 +55,6 @@ jobs:
           # 如果键没有发生缓存命中，则用于恢复缓存的键的显式密钥
           restore-keys: |
             ${{ runner.os }}-yarn-
-
       # 缓存依赖文件
       - name: Cache node_modules 📦
         id: cache-node-modules
@@ -68,7 +67,6 @@ jobs:
           # 如果键没有发生缓存命中，则用于恢复缓存的键的显式密钥
           restore-keys: |
             ${{ runner.os }}-${{ matrix.node-version }}-nodemodules-
-
       # 安装依赖
       - name: Install dependencies 🔧
         # 判断缓存是否命中
