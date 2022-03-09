@@ -18,7 +18,7 @@ jobs:
     runs-on: ubuntu-latest
 
     # 判断在指定用户或者组织的指定仓库中才执行
-    if: github.repository == 'F999999999/cloud-store'
+    if: github.repository == 'F999999999/cloud-store-serve'
     # 判断在指定用户或者组织中才执行
     # if: github.repository_owner == '用户名（组织名）'
 
