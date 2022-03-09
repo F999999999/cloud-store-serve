@@ -113,5 +113,6 @@ jobs:
           # 运行在远程服务器的命令
           # 重载PM2
           script: |
-            cd ${{ secrets.REMOTE_TARGET }}
+            export PATH=/www/server/nvm/versions/node/v16.14.0/bin:$PATH
+            cd /www/wwwroot/cloudstore_serve
             pm2 reload ecosystem.config.js
