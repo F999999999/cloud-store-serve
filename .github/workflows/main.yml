@@ -24,7 +24,7 @@ jobs:
 
     # 指定任务执行的命令
     steps:
-      # 检出代码
+      # 拉取代码
       - name: Checkout 🛎️
         uses: actions/checkout@v2
         with:
@@ -76,6 +76,9 @@ jobs:
         # 如果没有命中，则安装依赖
         run: yarn
 
+      # 生成压缩包
+      - run: tar –czvf release.tar.gz *
+
       # 部署到服务器
       - name: Deploy 🚀
         # 构建
@@ -111,8 +114,12 @@ jobs:
           # 命令超时配置 默认10m
           command_timeout: 20m
           # 运行在远程服务器的命令
+          # 临时添加node/bin目录到环境变量
+          # 切换到部署目录
+          # 解压压缩包
           # 重载PM2
           script: |
-            export PATH=/www/server/nvm/versions/node/v16.14.0/bin:$PATH
+            export PATH=${secrets.REMOTE_PATH}:$PATH
             cd ${{ secrets.REMOTE_TARGET }}
+            tar xzvf release.tar.gz
             pm2 reload ecosystem.config.js
