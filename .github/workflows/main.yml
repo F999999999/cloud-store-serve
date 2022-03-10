@@ -82,7 +82,7 @@ jobs:
       - name: Packaging 📦
         run: tar czvf release.tar.gz *
 
-      # 部署到服务器
+      # 上传到服务器
       - name: Deploy 🚀
         # 构建
         uses: easingthemes/ssh-deploy@v2.1.5
@@ -103,8 +103,8 @@ jobs:
           # --exclude 排除目标目录中那些被该选项指定的文件
           ARGS: "-rltgoDzvO --delete --exclude '.env'"
 
-      # 重载PM2
-      - name: PM2 Reload 🔁
+      # 部署服务器
+      - name: Deploy 🎉
         # 构建
         uses: appleboy/ssh-action@master
         with:
