@@ -44,7 +44,7 @@ jobs:
         run: echo "::set-output name=dir::$(yarn cache dir)"
 
       # 缓存 yarn
-      - name: Cache yarn cache 📦
+      - name: Cache yarn cache 💾
         uses: actions/cache@v2
         id: cache-yarn-cache
         with:
@@ -56,7 +56,7 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-yarn-
       # 缓存依赖文件
-      - name: Cache node_modules 📦
+      - name: Cache node_modules 💾
         id: cache-node-modules
         uses: actions/cache@v2
         with:
@@ -76,8 +76,9 @@ jobs:
         # 如果没有命中，则安装依赖
         run: yarn
 
-      # 生成压缩包
-      - run: tar czvf release.tar.gz *
+      # 打包并压缩
+      - name: Packaging 📦
+        run: tar czvf release.tar.gz *
 
       # 部署到服务器
       - name: Deploy 🚀
@@ -98,7 +99,7 @@ jobs:
           # rsync flags（默认值："-rltgoDzvO"）
           # --delete 删除那些目标目录中有而源目录中没有的多余文件
           # --exclude 排除目标目录中那些被该选项指定的文件
-          ARGS: "-rltgoDzvO --delete --exclude '.user.ini' --exclude '.env'"
+          ARGS: "-rltgoDzvO --delete --exclude '.env'"
 
       # 重载PM2
       - name: PM2 Reload 🔁
@@ -123,3 +124,4 @@ jobs:
             cd ${{ secrets.REMOTE_TARGET }}
             tar xzvf release.tar.gz
             pm2 reload ecosystem.config.js
+            rm -rf release.tar.gz
