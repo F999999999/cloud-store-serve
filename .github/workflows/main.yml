@@ -55,6 +55,7 @@ jobs:
           # 如果键没有发生缓存命中，则用于恢复缓存的键的显式密钥
           restore-keys: |
             ${{ runner.os }}-yarn-
+
       # 缓存依赖文件
       - name: Cache node_modules 💾
         id: cache-node-modules
@@ -67,6 +68,7 @@ jobs:
           # 如果键没有发生缓存命中，则用于恢复缓存的键的显式密钥
           restore-keys: |
             ${{ runner.os }}-${{ matrix.node-version }}-nodemodules-
+
       # 安装依赖
       - name: Install dependencies 🔧
         # 判断缓存是否命中
@@ -94,8 +96,8 @@ jobs:
           SSH_PRIVATE_KEY: ${{ secrets.REMOTE_SSH_KEY }}
           # 服务器部署路径
           TARGET: ${{ secrets.REMOTE_TARGET }}
-          # 源目录（打包的目录）
-          SOURCE: "/"
+          # 源目录（打包的目录或文件）
+          SOURCE: "release.tar.gz"
           # rsync flags（默认值："-rltgoDzvO"）
           # --delete 删除那些目标目录中有而源目录中没有的多余文件
           # --exclude 排除目标目录中那些被该选项指定的文件
@@ -112,13 +114,12 @@ jobs:
           username: ${{ secrets.REMOTE_USER }}
           # 服务器 SSH 私钥
           key: ${{ secrets.REMOTE_SSH_KEY }}
-          # 命令超时配置 默认10m
-          command_timeout: 20m
           # 运行在远程服务器的命令
           # 临时添加node/bin目录到环境变量
           # 切换到部署目录
           # 解压压缩包
           # 重载PM2
+          # 执行清理操作
           script: |
             export PATH=${secrets.REMOTE_PATH}:$PATH
             cd ${{ secrets.REMOTE_TARGET }}
