@@ -121,7 +121,7 @@ jobs:
           # 重载PM2
           # 执行清理操作
           script: |
-            export PATH=${secrets.REMOTE_PATH}:$PATH
+            export PATH=$PATH:${secrets.REMOTE_PATH}
             cd ${{ secrets.REMOTE_TARGET }}
             tar xzvf release.tar.gz
             pm2 reload ecosystem.config.js
