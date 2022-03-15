@@ -12,7 +12,18 @@ const { updateShelfGridGoods } = require("../model/shelf");
 
 // 获取商品信息
 module.exports.getGoodsController = async (ctx, next) => {
-  const data = await getGoods({ state: 1 });
+  // 获取参数
+  const { store_id } = ctx.request.query;
+  // 校验参数
+  if (!store_id) {
+    ctx.body = {
+      code: 400,
+      msg: "仓库ID不能为空",
+    };
+    return;
+  }
+
+  const data = await getGoods({ store_id, state: 1 });
   ctx.body = {
     status: 200,
     message: "获取商品信息成功",
@@ -22,7 +33,9 @@ module.exports.getGoodsController = async (ctx, next) => {
 
 // 添加商品
 module.exports.addGoodsController = async (ctx, next) => {
+  // 获取参数
   const {
+    store_id,
     name,
     weight,
     shelflife,
@@ -31,8 +44,30 @@ module.exports.addGoodsController = async (ctx, next) => {
     shelf_id,
     shelf_grid_id,
   } = ctx.request.body;
+  // 校验参数
+  if (!store_id) {
+    ctx.body = {
+      code: 400,
+      msg: "仓库ID不能为空",
+    };
+    return;
+  }
+  if (!shelf_id) {
+    ctx.body = {
+      code: 400,
+      msg: "货架ID不能为空",
+    };
+    return;
+  }
+  if (!shelf_grid_id) {
+    ctx.body = {
+      code: 400,
+      msg: "货架格子ID不能为空",
+    };
+    return;
+  }
   // 判断该位置是否已经有商品
-  const goods = await getGoodsByPosition({ shelf_id, shelf_grid_id });
+  const goods = await getGoodsByPosition({ store_id, shelf_id, shelf_grid_id });
   if (goods.length > 0) {
     ctx.body = {
       status: 400,
@@ -43,6 +78,7 @@ module.exports.addGoodsController = async (ctx, next) => {
 
   // 添加商品
   const result = await addGoods({
+    store_id,
     name,
     weight,
     shelflife,
@@ -53,6 +89,7 @@ module.exports.addGoodsController = async (ctx, next) => {
   });
   // 设置货架格子当前的商品
   const goodsResult = await updateShelfGridGoods({
+    store_id: Number(store_id),
     goods_id: result.insertId,
     shelf_id: Number(shelf_id),
     shelf_grid_id: Number(shelf_grid_id),
@@ -62,6 +99,7 @@ module.exports.addGoodsController = async (ctx, next) => {
     // 新增商品日志
     await addGoodsLog({
       goods_id: result.insertId,
+      now_store_id: Number(store_id),
       now_shelf_id: Number(shelf_id),
       now_shelf_grid_id: Number(shelf_grid_id),
       storage_time: Number(storage_time) || 0,
@@ -73,6 +111,7 @@ module.exports.addGoodsController = async (ctx, next) => {
       data: {
         goods_id: result.insertId,
         name,
+        store_id: Number(store_id),
         shelf_id: Number(shelf_id),
         shelf_grid_id: Number(shelf_grid_id),
       },
@@ -87,9 +126,39 @@ module.exports.addGoodsController = async (ctx, next) => {
 
 // 移动商品
 module.exports.moveGoodsController = async (ctx, next) => {
-  const { id, shelf_id, shelf_grid_id } = ctx.request.body;
+  // 获取参数
+  const { id, store_id, shelf_id, shelf_grid_id } = ctx.request.body;
+  // 校验参数
+  if (!id) {
+    ctx.body = {
+      code: 400,
+      msg: "商品ID不能为空",
+    };
+    return;
+  }
+  if (!store_id) {
+    ctx.body = {
+      code: 400,
+      msg: "仓库ID不能为空",
+    };
+    return;
+  }
+  if (!shelf_id) {
+    ctx.body = {
+      code: 400,
+      msg: "货架ID不能为空",
+    };
+    return;
+  }
+  if (!shelf_grid_id) {
+    ctx.body = {
+      code: 400,
+      msg: "货架格子ID不能为空",
+    };
+    return;
+  }
   // 判断该位置是否已经有商品
-  const goods = await getGoodsByPosition({ shelf_id, shelf_grid_id });
+  const goods = await getGoodsByPosition({ store_id, shelf_id, shelf_grid_id });
   if (goods.length > 0) {
     ctx.body = {
       status: 400,
@@ -98,62 +167,92 @@ module.exports.moveGoodsController = async (ctx, next) => {
     return;
   }
   // 获取商品当前位置信息
-  const goodsPosition = await getGoodsPosition({ id });
-  // 修改商品位置信息
-  const result = await updateGoodsPosition({ id, shelf_id, shelf_grid_id });
-  // 清除旧货架格子的商品
-  const oldGoodsResult = await updateShelfGridGoods({
-    goods_id: null,
-    shelf_id: goodsPosition[0].shelf_id,
-    shelf_grid_id: goodsPosition[0].shelf_grid_id,
-  });
-  // 设置新货架格子当前的商品
-  const newGoodsResult = await updateShelfGridGoods({
-    goods_id: id,
-    shelf_id,
-    shelf_grid_id,
-  });
-  // 判断商品位置是否修改成功
-  if (
-    result.serverStatus === 2 &&
-    oldGoodsResult.changedRows > 0 &&
-    newGoodsResult.changedRows > 0
-  ) {
-    // 新增商品日志
-    await addGoodsLog({
-      goods_id: id,
-      before_shelf_id: goodsPosition[0].shelf_id,
-      before_shelf_grid_id: goodsPosition[0].shelf_grid_id,
-      now_shelf_id: Number(shelf_id),
-      now_shelf_grid_id: Number(shelf_grid_id),
-      operate_time: Math.round(new Date() / 1000),
+  const goodsPosition = await getGoodsPosition({ ids: [id] });
+  if (goodsPosition.length > 0) {
+    // 修改商品位置信息
+    const result = await updateGoodsPosition({
+      store_id,
+      id,
+      shelf_id,
+      shelf_grid_id,
     });
-    ctx.body = {
-      status: 200,
-      message: "移动成功",
-      data: {
-        goods_id: Number(id),
+    // 清除旧货架格子的商品
+    const oldGoodsResult = await updateShelfGridGoods({
+      store_id: goodsPosition[0].store_id,
+      goods_id: null,
+      shelf_id: goodsPosition[0].shelf_id,
+      shelf_grid_id: goodsPosition[0].shelf_grid_id,
+    });
+    // 设置新货架格子当前的商品
+    const newGoodsResult = await updateShelfGridGoods({
+      store_id: goodsPosition[0].store_id,
+      goods_id: id,
+      shelf_id,
+      shelf_grid_id,
+    });
+    // 判断商品位置是否修改成功
+    if (
+      result.serverStatus === 2 &&
+      oldGoodsResult.changedRows > 0 &&
+      newGoodsResult.changedRows > 0
+    ) {
+      // 新增商品日志
+      await addGoodsLog({
+        goods_id: id,
+        before_store_id: goodsPosition[0].store_id,
         before_shelf_id: goodsPosition[0].shelf_id,
         before_shelf_grid_id: goodsPosition[0].shelf_grid_id,
-        shelf_id: Number(shelf_id),
-        shelf_grid_id: Number(shelf_grid_id),
-      },
-    };
+        now_store_id: Number(store_id),
+        now_shelf_id: Number(shelf_id),
+        now_shelf_grid_id: Number(shelf_grid_id),
+        operate_time: Math.round(new Date() / 1000),
+      });
+      ctx.body = {
+        status: 200,
+        message: "移动成功",
+        data: {
+          goods_id: Number(id),
+          before_store_id: goodsPosition[0].store_id,
+          before_shelf_id: goodsPosition[0].shelf_id,
+          before_shelf_grid_id: goodsPosition[0].shelf_grid_id,
+          store_id: Number(store_id),
+          shelf_id: Number(shelf_id),
+          shelf_grid_id: Number(shelf_grid_id),
+        },
+      };
+    } else {
+      ctx.body = {
+        status: 400,
+        message: "移动失败",
+      };
+    }
   } else {
     ctx.body = {
       status: 400,
-      message: "移动失败",
+      message: "商品不存在",
     };
   }
 };
 
 // 移除商品
 module.exports.removeGoodsController = async (ctx, next) => {
-  const { ids, takeout_time } = ctx.request.body;
-  console.log(ids);
+  // 获取参数
+  let { ids, takeout_time } = ctx.request.body;
+  // 校验参数
+  if (ids.length <= 0) {
+    ctx.body = {
+      code: 400,
+      msg: "商品ID列表不能为空",
+    };
+    return;
+  }
+  // 判断参数是否为数组 如果不是数组则转为数组
+  if (!Array.isArray(ids)) {
+    ids = ids.split(",");
+  }
+  ids = ids.map((id) => Number(id));
   // 获取商品当前位置信息
   const goodsPosition = await getGoodsPosition({ ids });
-  console.log("goodsPosition", goodsPosition);
   // 判断商品是否存在
   if (goodsPosition.length <= 0) {
     ctx.body = {
@@ -172,6 +271,7 @@ module.exports.removeGoodsController = async (ctx, next) => {
   for (const item of goodsPosition) {
     oldGoodsResultList.push(
       await updateShelfGridGoods({
+        store_id: item.store_id,
         goods_id: null,
         shelf_id: item.shelf_id,
         shelf_grid_id: item.shelf_grid_id,
@@ -190,13 +290,15 @@ module.exports.removeGoodsController = async (ctx, next) => {
     for (let i = 0; i < goodsPosition.length; i++) {
       await addGoodsLog({
         goods_id: ids[i],
+        before_store_id: goodsPosition[i].store_id,
         before_shelf_id: goodsPosition[i].shelf_id,
         before_shelf_grid_id: goodsPosition[i].shelf_grid_id,
-        takeout_time,
+        takeout_time: takeout_time || Math.round(new Date() / 1000),
         operate_time: Math.round(new Date() / 1000),
       });
       data.push({
         goods_id: Number(ids[i]),
+        before_store_id: goodsPosition[i].store_id,
         before_shelf_id: goodsPosition[i].shelf_id,
         before_shelf_grid_id: goodsPosition[i].shelf_grid_id,
       });
@@ -211,16 +313,15 @@ module.exports.removeGoodsController = async (ctx, next) => {
     ctx.body = {
       status: 400,
       message: "移除失败",
-      goods_id: ids,
     };
   }
 };
 
 // 模糊搜索商品
 module.exports.fuzzySearchGoodsController = async (ctx, next) => {
-  const { name } = ctx.request.query;
+  const { store_id, name } = ctx.request.query;
   // 搜索商品
-  const goods = await fuzzySearchGoodsByName({ name });
+  const goods = await fuzzySearchGoodsByName({ store_id, name });
   // 判断是否搜索到商品
   if (goods.length <= 0) {
     return (ctx.body = {

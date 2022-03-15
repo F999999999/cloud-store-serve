@@ -8,8 +8,18 @@ const {
 
 // 货架信息
 module.exports.shelfController = async (ctx, next) => {
+  // 获取参数
+  const { store_id } = ctx.request.query;
+  // 校验参数
+  if (!store_id) {
+    ctx.body = {
+      code: 400,
+      msg: "仓库ID不能为空",
+    };
+    return;
+  }
   // 获取货架信息
-  const result = await getShelf({ shelf_state: 1, goods_state: 1 });
+  const result = await getShelf({ store_id, shelf_state: 1, goods_state: 1 });
   const data = [];
   // 货架统计
   const total = {
@@ -88,9 +98,16 @@ module.exports.shelfController = async (ctx, next) => {
 // 新增货架
 module.exports.addShelfController = async (ctx, next) => {
   // 获取参数
-  const { name, length, width, height, x, y, z } = ctx.request.body;
+  const { store_id, name, length, width, height, x, y, z } = ctx.request.body;
 
   // 校验参数
+  if (!store_id) {
+    ctx.body = {
+      code: 400,
+      msg: "仓库ID不能为空",
+    };
+    return;
+  }
   if (!name) {
     ctx.body = {
       status: 400,
@@ -141,7 +158,7 @@ module.exports.addShelfController = async (ctx, next) => {
   }
 
   // 查询货架是否存在
-  const shelf = await getShelfByPosition({ x, y, z });
+  const shelf = await getShelfByPosition({ store_id, x, y, z });
   if (shelf.length > 0) {
     ctx.body = {
       status: 400,
@@ -151,11 +168,21 @@ module.exports.addShelfController = async (ctx, next) => {
   }
 
   // 新增货架
-  const result = await addShelf({ name, length, width, height, x, y, z });
+  const result = await addShelf({
+    store_id,
+    name,
+    length,
+    width,
+    height,
+    x,
+    y,
+    z,
+  });
   // 判断是否新增成功
   if (result.affectedRows > 0) {
     // 新增货架格子
     const gridResult = await addShelfGrid({
+      store_id,
       shelf_id: result.insertId,
       max_x: 1,
       max_y: 3,
@@ -182,8 +209,21 @@ module.exports.addShelfController = async (ctx, next) => {
 
 // 获取空货架格子
 module.exports.getEmptyShelfGridController = async (ctx, next) => {
+  // 获取参数
+  const { store_id } = ctx.request.query;
+  // 校验参数
+  if (!store_id) {
+    ctx.body = {
+      code: 400,
+      msg: "仓库ID不能为空",
+    };
+    return;
+  }
   // 搜索商品
-  const shelfGrid = await getEmptyShelfGrid({ state: 1 });
+  const shelfGrid = await getEmptyShelfGrid({
+    store_id: Number(store_id),
+    state: 1,
+  });
   // 判断是否搜索到商品
   if (shelfGrid.length <= 0) {
     ctx.body = {

@@ -1,5 +1,6 @@
 const router = require("koa-router")();
 
+const { storeController } = require("../controller/store");
 const {
   shelfController,
   getEmptyShelfGridController,
@@ -15,6 +16,9 @@ const {
 
 // 前缀
 router.prefix("/store");
+
+// 获取仓库数据
+router.get("/", storeController);
 
 // 获取货架数据
 router.get("/shelf", shelfController);
