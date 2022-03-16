@@ -24,11 +24,10 @@ module.exports.register = async (ctx, next) => {
     const user = await findUserByUserName(username);
     // 如果用户已注册 终止注册操作并返回
     if (user.length > 0) {
-      ctx.body = {
+      return (ctx.body = {
         status: 0,
         message: "您已注册，无需重复注册",
-      };
-      return;
+      });
     }
 
     // 注册

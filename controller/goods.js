@@ -7,6 +7,7 @@ const {
   updateGoodsPosition,
   updateGoodsState,
   fuzzySearchGoodsByName,
+  getGoodsLog,
 } = require("../model/goods");
 const { updateShelfGridGoods } = require("../model/shelf");
 
@@ -16,11 +17,10 @@ module.exports.getGoodsController = async (ctx, next) => {
   const { store_id } = ctx.request.query;
   // 校验参数
   if (!store_id) {
-    ctx.body = {
+    return (ctx.body = {
       code: 400,
       msg: "仓库ID不能为空",
-    };
-    return;
+    });
   }
 
   const data = await getGoods({ store_id, state: 1 });
@@ -46,34 +46,30 @@ module.exports.addGoodsController = async (ctx, next) => {
   } = ctx.request.body;
   // 校验参数
   if (!store_id) {
-    ctx.body = {
+    return (ctx.body = {
       code: 400,
       msg: "仓库ID不能为空",
-    };
-    return;
+    });
   }
   if (!shelf_id) {
-    ctx.body = {
+    return (ctx.body = {
       code: 400,
       msg: "货架ID不能为空",
-    };
-    return;
+    });
   }
   if (!shelf_grid_id) {
-    ctx.body = {
+    return (ctx.body = {
       code: 400,
       msg: "货架格子ID不能为空",
-    };
-    return;
+    });
   }
   // 判断该位置是否已经有商品
   const goods = await getGoodsByPosition({ store_id, shelf_id, shelf_grid_id });
   if (goods.length > 0) {
-    ctx.body = {
+    return (ctx.body = {
       status: 400,
       message: "该位置已有商品",
-    };
-    return;
+    });
   }
 
   // 添加商品
@@ -130,41 +126,36 @@ module.exports.moveGoodsController = async (ctx, next) => {
   const { id, store_id, shelf_id, shelf_grid_id } = ctx.request.body;
   // 校验参数
   if (!id) {
-    ctx.body = {
+    return (ctx.body = {
       code: 400,
       msg: "商品ID不能为空",
-    };
-    return;
+    });
   }
   if (!store_id) {
-    ctx.body = {
+    return (ctx.body = {
       code: 400,
       msg: "仓库ID不能为空",
-    };
-    return;
+    });
   }
   if (!shelf_id) {
-    ctx.body = {
+    return (ctx.body = {
       code: 400,
       msg: "货架ID不能为空",
-    };
-    return;
+    });
   }
   if (!shelf_grid_id) {
-    ctx.body = {
+    return (ctx.body = {
       code: 400,
       msg: "货架格子ID不能为空",
-    };
-    return;
+    });
   }
   // 判断该位置是否已经有商品
   const goods = await getGoodsByPosition({ store_id, shelf_id, shelf_grid_id });
   if (goods.length > 0) {
-    ctx.body = {
+    return (ctx.body = {
       status: 400,
       message: "该位置已有商品，请换个位置",
-    };
-    return;
+    });
   }
   // 获取商品当前位置信息
   const goodsPosition = await getGoodsPosition({ ids: [id] });
@@ -240,11 +231,10 @@ module.exports.removeGoodsController = async (ctx, next) => {
   let { ids, takeout_time } = ctx.request.body;
   // 校验参数
   if (ids.length <= 0) {
-    ctx.body = {
+    return (ctx.body = {
       code: 400,
       msg: "商品ID列表不能为空",
-    };
-    return;
+    });
   }
   // 判断参数是否为数组 如果不是数组则转为数组
   if (!Array.isArray(ids)) {
@@ -255,11 +245,10 @@ module.exports.removeGoodsController = async (ctx, next) => {
   const goodsPosition = await getGoodsPosition({ ids });
   // 判断商品是否存在
   if (goodsPosition.length <= 0) {
-    ctx.body = {
+    return (ctx.body = {
       status: 400,
       message: "商品不存在",
-    };
-    return;
+    });
   }
   // 修改商品状态
   const result = await updateGoodsState({
@@ -319,6 +308,7 @@ module.exports.removeGoodsController = async (ctx, next) => {
 
 // 模糊搜索商品
 module.exports.fuzzySearchGoodsController = async (ctx, next) => {
+  // 获取参数
   const { store_id, name } = ctx.request.query;
   // 搜索商品
   const goods = await fuzzySearchGoodsByName({ store_id, name });
@@ -334,5 +324,22 @@ module.exports.fuzzySearchGoodsController = async (ctx, next) => {
     status: 200,
     message: "已搜索到" + goods.length + "个商品",
     data: goods,
+  };
+};
+
+// 获取商品流水
+module.exports.getGoodsLogController = async (ctx, next) => {
+  // 获取参数
+  const { page_num, page_size } = ctx.request.query;
+
+  const result = await getGoodsLog({
+    page_num: Number(page_num) || 1,
+    page_size: Number(page_size) || 10,
+  });
+
+  ctx.body = {
+    status: 200,
+    message: "获取成功",
+    data: result,
   };
 };

@@ -124,3 +124,11 @@ module.exports.fuzzySearchGoodsByName = async ({
     store_id ? [store_id, state] : [state]
   );
 };
+
+//
+module.exports.getGoodsLog = async ({ page_num = 1, page_size = 10 }) => {
+  return await query(
+    `SELECT id,goods_id,(SELECT name FROM store_goods WHERE id = goods_id) AS goods_name,before_store_id,before_shelf_id,before_shelf_grid_id,now_store_id,now_shelf_id,now_shelf_grid_id,storage_time,takeout_time,operate_time FROM store_goods_log order by operate_time desc LIMIT ?,?`,
+    [(page_num - 1) * page_size, page_size]
+  );
+};
