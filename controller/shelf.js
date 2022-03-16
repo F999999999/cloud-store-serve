@@ -263,6 +263,7 @@ module.exports.shelfTotalController = async (ctx, next) => {
     } else {
       store_total.push({
         store_id: item.store_id,
+        store_name: item.store_name,
         total_grid: total_grid,
         use_grid: item.use_grid,
         empty_grid: item.empty_grid,
