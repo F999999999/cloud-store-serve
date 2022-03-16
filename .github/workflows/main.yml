@@ -117,6 +117,7 @@ jobs:
           # 运行在远程服务器的命令
           # 临时添加node/bin目录到环境变量
           # 切换到部署目录
+          # 开启 extglob
           # 删除旧文件
           # 解压压缩包
           # 重载PM2
@@ -124,6 +125,7 @@ jobs:
           script: |
             export PATH=$PATH:${{ secrets.REMOTE_PATH }}
             cd ${{ secrets.REMOTE_TARGET }}
+            shopt -s extglob
             rm -rf !(release.tar.gz|.env)
             tar xzf release.tar.gz
             pm2 reload ecosystem.config.js
