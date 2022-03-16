@@ -117,12 +117,14 @@ jobs:
           # 运行在远程服务器的命令
           # 临时添加node/bin目录到环境变量
           # 切换到部署目录
+          # 删除旧文件
           # 解压压缩包
           # 重载PM2
           # 执行清理操作
           script: |
             export PATH=$PATH:${{ secrets.REMOTE_PATH }}
             cd ${{ secrets.REMOTE_TARGET }}
-            tar xzvf release.tar.gz
+            rm -rf !(release.tar.gz|.env)
+            tar xzf release.tar.gz
             pm2 reload ecosystem.config.js
             rm -rf release.tar.gz
