@@ -66,7 +66,6 @@ module.exports.login = async (ctx, next) => {
         {
           id: user[0].id,
           username,
-          password,
         },
         process.env.JWT_SECRET_KEY,
         { expiresIn: 60 * 60 * 24 * 7 }

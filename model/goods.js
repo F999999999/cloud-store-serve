@@ -59,10 +59,11 @@ module.exports.addGoodsLog = async ({
   now_shelf_grid_id,
   storage_time,
   takeout_time,
+  operate_id,
   operate_time,
 }) => {
   return await query(
-    `INSERT INTO store_goods_log (goods_id,before_store_id,before_shelf_id,before_shelf_grid_id,now_store_id,now_shelf_id,now_shelf_grid_id,storage_time,takeout_time,operate_time) VALUES (?,?,?,?,?,?,?,?,?,?)`,
+    `INSERT INTO store_goods_log (goods_id,before_store_id,before_shelf_id,before_shelf_grid_id,now_store_id,now_shelf_id,now_shelf_grid_id,storage_time,takeout_time,operate_id,operate_time) VALUES (?,?,?,?,?,?,?,?,?,?,?)`,
     [
       goods_id,
       before_store_id,
@@ -73,6 +74,7 @@ module.exports.addGoodsLog = async ({
       now_shelf_grid_id,
       storage_time,
       takeout_time,
+      operate_id,
       operate_time,
     ]
   );
@@ -125,7 +127,7 @@ module.exports.fuzzySearchGoodsByName = async ({
   );
 };
 
-//
+// 查询商品日志
 module.exports.getGoodsLog = async ({ page_num = 1, page_size = 10 }) => {
   return await query(
     `SELECT id,goods_id,(SELECT name FROM store_goods WHERE id = goods_id) AS goods_name,before_store_id,before_shelf_id,before_shelf_grid_id,now_store_id,now_shelf_id,now_shelf_grid_id,storage_time,takeout_time,operate_time FROM store_goods_log order by operate_time desc LIMIT ?,?`,
