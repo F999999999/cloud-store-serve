@@ -140,18 +140,6 @@ module.exports.moveGoodsController = async (ctx, next) => {
       msg: "商品ID不能为空",
     });
   }
-  if (!store_id) {
-    return (ctx.body = {
-      code: 400,
-      msg: "仓库ID不能为空",
-    });
-  }
-  if (!shelf_id) {
-    return (ctx.body = {
-      code: 400,
-      msg: "货架ID不能为空",
-    });
-  }
   if (!shelf_grid_id) {
     return (ctx.body = {
       code: 400,
@@ -164,36 +152,41 @@ module.exports.moveGoodsController = async (ctx, next) => {
       msg: "操作人ID不能为空",
     });
   }
+
+  // 获取商品当前位置信息
+  const goodsPosition = await getGoodsPosition({ ids: [id] });
   // 判断该位置是否已经有商品
-  const goods = await getGoodsByPosition({ store_id, shelf_id, shelf_grid_id });
+  const goods = await getGoodsByPosition({
+    store_id: store_id ? store_id : goodsPosition[0].store_id,
+    shelf_id: shelf_id ? shelf_id : goodsPosition[0].shelf_id,
+    shelf_grid_id,
+  });
   if (goods.length > 0) {
     return (ctx.body = {
       status: 400,
       message: "该位置已有商品，请换个位置",
     });
   }
-  // 获取商品当前位置信息
-  const goodsPosition = await getGoodsPosition({ ids: [id] });
   if (goodsPosition.length > 0) {
     // 修改商品位置信息
     const result = await updateGoodsPosition({
-      store_id,
       id,
-      shelf_id,
+      store_id: store_id ? store_id : goodsPosition[0].store_id,
+      shelf_id: shelf_id ? shelf_id : goodsPosition[0].shelf_id,
       shelf_grid_id,
     });
     // 清除旧货架格子的商品
     const oldGoodsResult = await updateShelfGridGoods({
-      store_id: goodsPosition[0].store_id,
       goods_id: null,
+      store_id: goodsPosition[0].store_id,
       shelf_id: goodsPosition[0].shelf_id,
       shelf_grid_id: goodsPosition[0].shelf_grid_id,
     });
     // 设置新货架格子当前的商品
     const newGoodsResult = await updateShelfGridGoods({
-      store_id: goodsPosition[0].store_id,
       goods_id: id,
-      shelf_id,
+      store_id: store_id ? store_id : goodsPosition[0].store_id,
+      shelf_id: shelf_id ? shelf_id : goodsPosition[0].shelf_id,
       shelf_grid_id,
     });
     // 判断商品位置是否修改成功
@@ -208,8 +201,8 @@ module.exports.moveGoodsController = async (ctx, next) => {
         before_store_id: goodsPosition[0].store_id,
         before_shelf_id: goodsPosition[0].shelf_id,
         before_shelf_grid_id: goodsPosition[0].shelf_grid_id,
-        now_store_id: Number(store_id),
-        now_shelf_id: Number(shelf_id),
+        now_store_id: Number(store_id ? store_id : goodsPosition[0].store_id),
+        now_shelf_id: Number(shelf_id ? shelf_id : goodsPosition[0].shelf_id),
         now_shelf_grid_id: Number(shelf_grid_id),
         operate_id,
         operate_time: Math.round(new Date() / 1000),
@@ -222,8 +215,8 @@ module.exports.moveGoodsController = async (ctx, next) => {
           before_store_id: goodsPosition[0].store_id,
           before_shelf_id: goodsPosition[0].shelf_id,
           before_shelf_grid_id: goodsPosition[0].shelf_grid_id,
-          store_id: Number(store_id),
-          shelf_id: Number(shelf_id),
+          store_id: Number(store_id ? store_id : goodsPosition[0].store_id),
+          shelf_id: Number(shelf_id ? shelf_id : goodsPosition[0].shelf_id),
           shelf_grid_id: Number(shelf_grid_id),
         },
       };

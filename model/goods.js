@@ -92,8 +92,8 @@ module.exports.getGoodsPosition = async ({ ids, state = 1 }) => {
 
 // 修改商品位置信息
 module.exports.updateGoodsPosition = async ({
-  store_id,
   id,
+  store_id,
   shelf_id,
   shelf_grid_id,
 }) => {
