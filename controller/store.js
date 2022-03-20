@@ -3,7 +3,7 @@ const { getStore, getStoreTotal } = require("../model/store");
 // 获取仓库信息
 module.exports.storeController = async (ctx, next) => {
   // 获取仓库信息
-  const result = await getStore({ state: 1 });
+  const result = await getStore({ states: 1 });
 
   // 返回数据
   ctx.body = {
@@ -18,7 +18,7 @@ module.exports.storeTotalController = async (ctx, next) => {
   // 获取参数
   const { store_id } = ctx.request.query;
   // 获取仓库信息
-  const result = await getStoreTotal({ store_id, state: 1 });
+  const result = await getStoreTotal({ store_id, states: 1 });
 
   const total = {
     total_grid: 0,

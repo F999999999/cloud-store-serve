@@ -19,7 +19,7 @@ module.exports.shelfController = async (ctx, next) => {
     });
   }
   // 获取货架信息
-  const result = await getShelf({ store_id, shelf_state: 1, goods_state: 1 });
+  const result = await getShelf({ store_id, shelf_states: 1, goods_states: 1 });
   const data = [];
   // 货架统计
   const total = {
@@ -213,7 +213,7 @@ module.exports.getEmptyShelfGridController = async (ctx, next) => {
   // 搜索商品
   const shelfGrid = await getEmptyShelfGrid({
     store_id: Number(store_id),
-    state: 1,
+    states: 1,
   });
   // 判断是否搜索到商品
   if (shelfGrid.length <= 0) {
@@ -236,7 +236,7 @@ module.exports.shelfTotalController = async (ctx, next) => {
   const { shelf_id } = ctx.request.query;
 
   // 获取货架信息
-  const result = await getShelfTotal({ shelf_id, state: 1 });
+  const result = await getShelfTotal({ shelf_id, states: 1 });
 
   const total = {
     total_grid: 0,

@@ -23,7 +23,7 @@ module.exports.getGoodsController = async (ctx, next) => {
     });
   }
 
-  const data = await getGoods({ store_id, state: 1 });
+  const data = await getGoods({ store_id, states: 1 });
   ctx.body = {
     status: 200,
     message: "获取商品信息成功",
