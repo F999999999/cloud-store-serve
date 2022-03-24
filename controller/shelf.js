@@ -15,7 +15,7 @@ module.exports.shelfController = async (ctx, next) => {
   if (!store_id) {
     return (ctx.body = {
       code: 400,
-      msg: "仓库ID不能为空",
+      message: "仓库ID不能为空",
     });
   }
   // 获取货架信息
@@ -74,7 +74,7 @@ module.exports.shelfController = async (ctx, next) => {
       },
     });
 
-    // 判断货架格子上是否有货物
+    // 判断货架格子上是否有商品
     if (item.goods_id > 0) {
       // 已使用货架格子++
       data[index].total.useGrid++;
@@ -104,7 +104,7 @@ module.exports.addShelfController = async (ctx, next) => {
   if (!store_id) {
     return (ctx.body = {
       code: 400,
-      msg: "仓库ID不能为空",
+      message: "仓库ID不能为空",
     });
   }
   if (!name) {
@@ -207,7 +207,7 @@ module.exports.getEmptyShelfGridController = async (ctx, next) => {
   if (!store_id) {
     return (ctx.body = {
       code: 400,
-      msg: "仓库ID不能为空",
+      message: "仓库ID不能为空",
     });
   }
   // 搜索商品

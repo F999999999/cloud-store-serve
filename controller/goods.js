@@ -19,7 +19,7 @@ module.exports.getGoodsController = async (ctx, next) => {
   if (!store_id) {
     return (ctx.body = {
       code: 400,
-      msg: "仓库ID不能为空",
+      message: "仓库ID不能为空",
     });
   }
 
@@ -49,25 +49,25 @@ module.exports.addGoodsController = async (ctx, next) => {
   if (!store_id) {
     return (ctx.body = {
       code: 400,
-      msg: "仓库ID不能为空",
+      message: "仓库ID不能为空",
     });
   }
   if (!shelf_id) {
     return (ctx.body = {
       code: 400,
-      msg: "货架ID不能为空",
+      message: "货架ID不能为空",
     });
   }
   if (!shelf_grid_id) {
     return (ctx.body = {
       code: 400,
-      msg: "货架格子ID不能为空",
+      message: "货架格子ID不能为空",
     });
   }
   if (!operate_id) {
     return (ctx.body = {
       code: 400,
-      msg: "操作人ID不能为空",
+      message: "操作人ID不能为空",
     });
   }
   // 判断该位置是否已经有商品
@@ -115,6 +115,10 @@ module.exports.addGoodsController = async (ctx, next) => {
       data: {
         goods_id: result.insertId,
         name,
+        weight: Number(weight),
+        shelflife: Number(shelflife),
+        production_date: Number(production_date),
+        storage_time: Number(storage_time),
         store_id: Number(store_id),
         shelf_id: Number(shelf_id),
         shelf_grid_id: Number(shelf_grid_id),
@@ -137,19 +141,19 @@ module.exports.moveGoodsController = async (ctx, next) => {
   if (!id) {
     return (ctx.body = {
       code: 400,
-      msg: "商品ID不能为空",
+      message: "商品ID不能为空",
     });
   }
   if (!shelf_grid_id) {
     return (ctx.body = {
       code: 400,
-      msg: "货架格子ID不能为空",
+      message: "货架格子ID不能为空",
     });
   }
   if (!operate_id) {
     return (ctx.body = {
       code: 400,
-      msg: "操作人ID不能为空",
+      message: "操作人ID不能为空",
     });
   }
 
@@ -242,13 +246,13 @@ module.exports.removeGoodsController = async (ctx, next) => {
   if (ids.length <= 0) {
     return (ctx.body = {
       code: 400,
-      msg: "商品ID列表不能为空",
+      message: "商品ID列表不能为空",
     });
   }
   if (!operate_id) {
     return (ctx.body = {
       code: 400,
-      msg: "操作人ID不能为空",
+      message: "操作人ID不能为空",
     });
   }
   // 判断参数是否为数组 如果不是数组则转为数组
@@ -355,7 +359,7 @@ module.exports.getGoodsLogController = async (ctx, next) => {
 
   ctx.body = {
     status: 200,
-    message: "获取成功",
+    message: "获取商品流水成功",
     data: result,
   };
 };
