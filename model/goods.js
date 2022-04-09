@@ -162,3 +162,11 @@ LIMIT ?,?
     [(page_num - 1) * page_size, page_size]
   );
 };
+
+// 获取临期商品
+module.exports.getExpireGoods = async ({ page_num = 1, page_size = 10 }) => {
+  return await query(
+    `SELECT id,name,weight,shelflife,production_date,production_date+shelflife*86400 AS expiration_time,storage_time,store_id,shelf_id,shelf_grid_id FROM store_goods WHERE states = 1 ORDER BY expiration_time LIMIT ?,?`,
+    [(page_num - 1) * page_size, page_size]
+  );
+};
