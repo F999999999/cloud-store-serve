@@ -191,7 +191,9 @@ store_id,
 COUNT(CASE WHEN production_date + shelflife * 86400 - unix_timestamp(now()) > 0 AND production_date + shelflife * 86400 - unix_timestamp(now()) < shelflife * 86400 * 0.2 THEN 1 ELSE NULL END) AS 'will_expire',
 COUNT(CASE WHEN production_date + shelflife * 86400 - unix_timestamp(now()) < 0 THEN 1 ELSE NULL END) AS 'expired',
 COUNT(CASE WHEN production_date + shelflife * 86400 - unix_timestamp(now()) > shelflife * 86400 * 0.2 THEN 1 ELSE NULL END) AS 'normal'
-FROM store_goods WHERE states = 1 GROUP BY store_id
+FROM store_goods 
+WHERE states = 1 
+GROUP BY store_id
 `
   );
 };
