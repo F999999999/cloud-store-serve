@@ -9,6 +9,7 @@ const {
   fuzzySearchGoodsByName,
   getGoodsLog,
   getExpireGoods,
+  getExpireGoodsTotal,
 } = require("../model/goods");
 const { updateShelfGridGoods } = require("../model/shelf");
 
@@ -368,9 +369,10 @@ module.exports.getGoodsLogController = async (ctx, next) => {
 // 获取临期商品
 module.exports.getExpireGoodsController = async (ctx, next) => {
   // 获取参数
-  const { page_num, page_size } = ctx.request.query;
+  const { store_id, page_num, page_size } = ctx.request.query;
 
   const result = await getExpireGoods({
+    store_id,
     page_num: Number(page_num) || 1,
     page_size: Number(page_size) || 10,
   });
@@ -379,5 +381,29 @@ module.exports.getExpireGoodsController = async (ctx, next) => {
     status: 200,
     message: "获取临期商品成功",
     data: result,
+  };
+};
+
+// 获取临期商品统计
+module.exports.getExpireGoodsTotalController = async (ctx, next) => {
+  const result = await getExpireGoodsTotal();
+  // 总计
+  const total = {
+    will_expire: 0,
+    expired: 0,
+    normal: 0,
+  };
+
+  // 遍历所有仓库的数据
+  result.forEach((item) => {
+    total.will_expire += item.will_expire || 0;
+    total.expired += item.exports || 0;
+    total.normal += item.normal || 0;
+  });
+
+  ctx.body = {
+    status: 200,
+    message: "获取临期商品统计成功",
+    data: { list: result, total },
   };
 };

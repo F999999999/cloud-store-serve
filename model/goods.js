@@ -164,9 +164,34 @@ LIMIT ?,?
 };
 
 // 获取临期商品
-module.exports.getExpireGoods = async ({ page_num = 1, page_size = 10 }) => {
+module.exports.getExpireGoods = async ({
+  store_id,
+  page_num = 1,
+  page_size = 10,
+}) => {
+  // 查询参数
+  const payload = [(page_num - 1) * page_size, page_size];
+  store_id ? payload.unshift(store_id) : null;
+
   return await query(
-    `SELECT id,name,weight,shelflife,production_date,production_date+shelflife*86400 AS expiration_time,storage_time,store_id,shelf_id,shelf_grid_id FROM store_goods WHERE states = 1 ORDER BY expiration_time LIMIT ?,?`,
-    [(page_num - 1) * page_size, page_size]
+    `SELECT id,name,weight,shelflife,production_date,production_date+shelflife*86400 AS expiration_time,storage_time,store_id,shelf_id,shelf_grid_id FROM store_goods WHERE ${
+      store_id ? "store_id = ? AND " : ""
+    }states = 1 ORDER BY expiration_time LIMIT ?,?`,
+    payload
+  );
+};
+
+// 获临期商品统计
+module.exports.getExpireGoodsTotal = async () => {
+  return await query(
+    `
+SELECT 
+store_id,
+(SELECT name FROM store WHERE id = store_id) AS store_name,
+COUNT(CASE WHEN production_date + shelflife * 86400 - unix_timestamp(now()) > 0 AND production_date + shelflife * 86400 - unix_timestamp(now()) < shelflife * 86400 * 0.2 THEN 1 ELSE NULL END) AS 'will_expire',
+COUNT(CASE WHEN production_date + shelflife * 86400 - unix_timestamp(now()) < 0 THEN 1 ELSE NULL END) AS 'expired',
+COUNT(CASE WHEN production_date + shelflife * 86400 - unix_timestamp(now()) > shelflife * 86400 * 0.2 THEN 1 ELSE NULL END) AS 'normal'
+FROM store_goods WHERE states = 1 GROUP BY store_id
+`
   );
 };

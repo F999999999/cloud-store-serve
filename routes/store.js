@@ -18,6 +18,7 @@ const {
   fuzzySearchGoodsController,
   getGoodsLogController,
   getExpireGoodsController,
+  getExpireGoodsTotalController,
 } = require("../controller/goods");
 
 // 前缀
@@ -61,6 +62,9 @@ router.get("/goods_log", getGoodsLogController);
 
 // 获取临期商品
 router.get("/expire_goods", getExpireGoodsController);
+
+// 获取临期商品统计
+router.get("/expire_goods_total", getExpireGoodsTotalController);
 
 // 导出路由
 module.exports = router;
