@@ -64,7 +64,7 @@ module.exports.addShelfGrid = async ({
     for (let j = 0; j <= max_x; j++) {
       for (let k = 0; k <= max_z; k++) {
         arr.push(`(?,?,?,?,?,?)`);
-        payload.push([store_id, shelf_id, arr.length + 1, j, i, k]);
+        payload.push(store_id, shelf_id, arr.length, j, i, k);
       }
     }
   }

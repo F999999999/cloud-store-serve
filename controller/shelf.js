@@ -174,7 +174,7 @@ module.exports.addShelfController = async (ctx, next) => {
   if (result.affectedRows > 0) {
     // 新增货架格子
     const gridResult = await addShelfGrid({
-      store_id,
+      store_id: Number(store_id),
       shelf_id: result.insertId,
       max_x: 1,
       max_y: 3,
