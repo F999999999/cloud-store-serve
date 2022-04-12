@@ -6,6 +6,7 @@ const onerror = require("koa-onerror");
 const bodyparser = require("koa-bodyparser");
 const logger = require("koa-logger");
 const jwt = require("koa-jwt");
+const jsonwebtoken = require("jsonwebtoken");
 const cors = require("koa2-cors");
 // 配置 process.env
 require("dotenv").config();
@@ -35,6 +36,13 @@ app.use((ctx, next) => {
       throw err;
     }
   });
+});
+// 解析 Token 数据
+app.use((ctx, next) => {
+  ctx.request.docodeToken = jsonwebtoken.decode(
+    ctx.request.headers.authorization.slice(7)
+  );
+  return next();
 });
 // 设置哪些接口不需要 token
 app.use(

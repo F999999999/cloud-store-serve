@@ -15,6 +15,7 @@ const { updateShelfGridGoods } = require("../model/shelf");
 
 // 获取商品信息
 module.exports.getGoodsController = async (ctx, next) => {
+  console.log("getGoodsController", ctx.request.docodeToken);
   // 获取参数
   const { store_id } = ctx.request.query;
   // 校验参数
@@ -45,7 +46,6 @@ module.exports.addGoodsController = async (ctx, next) => {
     storage_time,
     shelf_id,
     shelf_grid_id,
-    operate_id,
   } = ctx.request.body;
   // 校验参数
   if (!store_id) {
@@ -64,12 +64,6 @@ module.exports.addGoodsController = async (ctx, next) => {
     return (ctx.body = {
       code: 400,
       message: "货架格子ID不能为空",
-    });
-  }
-  if (!operate_id) {
-    return (ctx.body = {
-      code: 400,
-      message: "操作人ID不能为空",
     });
   }
   // 判断该位置是否已经有商品
@@ -108,7 +102,7 @@ module.exports.addGoodsController = async (ctx, next) => {
       now_shelf_id: Number(shelf_id),
       now_shelf_grid_id: Number(shelf_grid_id),
       storage_time: Number(storage_time) || 0,
-      operate_id,
+      operate_id: ctx.request.docodeToken.id,
       operate_time: Math.round(new Date() / 1000),
     });
     ctx.body = {
@@ -137,8 +131,7 @@ module.exports.addGoodsController = async (ctx, next) => {
 // 移动商品
 module.exports.moveGoodsController = async (ctx, next) => {
   // 获取参数
-  const { id, store_id, shelf_id, shelf_grid_id, operate_id } =
-    ctx.request.body;
+  const { id, store_id, shelf_id, shelf_grid_id } = ctx.request.body;
   // 校验参数
   if (!id) {
     return (ctx.body = {
@@ -150,12 +143,6 @@ module.exports.moveGoodsController = async (ctx, next) => {
     return (ctx.body = {
       code: 400,
       message: "货架格子ID不能为空",
-    });
-  }
-  if (!operate_id) {
-    return (ctx.body = {
-      code: 400,
-      message: "操作人ID不能为空",
     });
   }
 
@@ -210,7 +197,7 @@ module.exports.moveGoodsController = async (ctx, next) => {
         now_store_id: Number(store_id ? store_id : goodsPosition[0].store_id),
         now_shelf_id: Number(shelf_id ? shelf_id : goodsPosition[0].shelf_id),
         now_shelf_grid_id: Number(shelf_grid_id),
-        operate_id,
+        operate_id: ctx.request.docodeToken.id,
         operate_time: Math.round(new Date() / 1000),
       });
       ctx.body = {
@@ -243,7 +230,7 @@ module.exports.moveGoodsController = async (ctx, next) => {
 // 移除商品
 module.exports.removeGoodsController = async (ctx, next) => {
   // 获取参数
-  let { ids, takeout_time, operate_id } = ctx.request.body;
+  let { ids, takeout_time } = ctx.request.body;
   // 校验参数
   if (ids.length <= 0) {
     return (ctx.body = {
@@ -251,12 +238,7 @@ module.exports.removeGoodsController = async (ctx, next) => {
       message: "商品ID列表不能为空",
     });
   }
-  if (!operate_id) {
-    return (ctx.body = {
-      code: 400,
-      message: "操作人ID不能为空",
-    });
-  }
+
   // 判断参数是否为数组 如果不是数组则转为数组
   if (!Array.isArray(ids)) {
     ids = ids.split(",");
@@ -304,7 +286,7 @@ module.exports.removeGoodsController = async (ctx, next) => {
         before_shelf_id: goodsPosition[i].shelf_id,
         before_shelf_grid_id: goodsPosition[i].shelf_grid_id,
         takeout_time: takeout_time || Math.round(new Date() / 1000),
-        operate_id,
+        operate_id: ctx.request.docodeToken.id,
         operate_time: Math.round(new Date() / 1000),
       });
       data.push({
