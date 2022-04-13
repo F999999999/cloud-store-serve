@@ -11,13 +11,6 @@ const {
 module.exports.shelfController = async (ctx, next) => {
   // 获取参数
   const { store_id } = ctx.request.query;
-  // 校验参数
-  if (!store_id) {
-    return (ctx.body = {
-      code: 400,
-      message: "仓库ID不能为空",
-    });
-  }
   // 获取货架信息
   const result = await getShelf({ store_id, shelf_states: 1, goods_states: 1 });
   const data = [];

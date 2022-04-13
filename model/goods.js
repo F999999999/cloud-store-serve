@@ -128,7 +128,14 @@ module.exports.fuzzySearchGoodsByName = async ({
 };
 
 // 查询商品日志
-module.exports.getGoodsLog = async ({ page_num = 1, page_size = 10 }) => {
+module.exports.getGoodsLog = async ({
+  store_id,
+  page_num = 1,
+  page_size = 10,
+}) => {
+  const payload = [(page_num - 1) * page_size, page_size];
+  // 如果有仓库ID添加需要查询的仓库ID
+  store_id && payload.unshift(store_id, store_id);
   return await query(
     `
 SELECT 
@@ -156,10 +163,11 @@ takeout_time,
 operate_id,
 (SELECT username FROM sys_user WHERE id = operate_id) AS operate_name,operate_time 
 FROM store_goods_log 
+${store_id ? "WHERE before_store_id = ? OR now_store_id = ? " : ""}
 order by operate_time desc 
 LIMIT ?,?
 `,
-    [(page_num - 1) * page_size, page_size]
+    payload
   );
 };
 

@@ -6,9 +6,13 @@ module.exports.getShelf = async ({
   shelf_states = 1,
   goods_states = 1,
 }) => {
+  const payload = [shelf_states, goods_states];
+  store_id && payload.push(store_id);
   return await query(
-    `SELECT a.id,a.name,a.length,a.width,a.height,a.x,a.y,a.z,a.store_id,b.goods_id,b.shelf_grid_id,b.x AS grid_x,b.y AS grid_y,b.z AS grid_z FROM store_shelf AS a,store_shelf_grid AS b WHERE a.store_id = ? AND a.states = ? AND b.states = ? AND a.id = b.shelf_id`,
-    [store_id, shelf_states, goods_states]
+    `SELECT a.id,a.name,a.length,a.width,a.height,a.x,a.y,a.z,a.store_id,b.goods_id,b.shelf_grid_id,b.x AS grid_x,b.y AS grid_y,b.z AS grid_z FROM store_shelf AS a,store_shelf_grid AS b WHERE ${
+      store_id ? `a.store_id = ? AND` : ""
+    } a.id = b.shelf_id AND a.states = ? AND b.states = ?`,
+    payload
   );
 };
 

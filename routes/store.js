@@ -30,14 +30,14 @@ router.get("/", storeController);
 // 获取仓库使用统计数据
 router.get("/store_total", storeTotalController);
 
+// 获取货架数据
+router.get("/shelf", shelfController);
+
 // 新增货架
 router.post("/add_shelf", addShelfController);
 
 // 获取空货架格子
 router.get("/empty_grid", getEmptyShelfGridController);
-
-// 获取货架数据
-router.get("/shelf", shelfController);
 
 // 获取货架使用统计数据
 router.get("/shelf_total", shelfTotalController);
@@ -57,7 +57,7 @@ router.post("/remove_goods", removeGoodsController);
 // 模糊搜索商品
 router.get("/search_goods", fuzzySearchGoodsController);
 
-// 获取商品流水
+// 获取商品日志
 router.get("/goods_log", getGoodsLogController);
 
 // 获取临期商品

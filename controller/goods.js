@@ -334,16 +334,17 @@ module.exports.fuzzySearchGoodsController = async (ctx, next) => {
 // 获取商品流水
 module.exports.getGoodsLogController = async (ctx, next) => {
   // 获取参数
-  const { page_num, page_size } = ctx.request.query;
+  const { store_id, page_num, page_size } = ctx.request.query;
 
   const result = await getGoodsLog({
+    store_id: Number(store_id) || null,
     page_num: Number(page_num) || 1,
     page_size: Number(page_size) || 10,
   });
 
   ctx.body = {
     status: 200,
-    message: "获取商品流水成功",
+    message: "获取商品日志成功",
     data: result,
   };
 };
