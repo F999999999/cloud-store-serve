@@ -40,7 +40,7 @@ app.use((ctx, next) => {
 // 解析 token 数据
 app.use((ctx, next) => {
   ctx.request.docodeToken = jsonwebtoken.decode(
-    ctx.request.headers.authorization.slice(7)
+    ctx.request.headers?.authorization?.slice(7)
   );
   return next();
 });
