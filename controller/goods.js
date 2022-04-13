@@ -331,7 +331,7 @@ module.exports.fuzzySearchGoodsController = async (ctx, next) => {
   };
 };
 
-// 获取商品流水
+// 获取商品日志
 module.exports.getGoodsLogController = async (ctx, next) => {
   // 获取参数
   const { store_id, page_num, page_size } = ctx.request.query;
