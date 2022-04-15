@@ -38,7 +38,9 @@ module.exports.shelfController = async (ctx, next) => {
 
     if (!data.find((item2) => item2.id === item.id)) {
       const obj = {
-        ...item,
+        id: item.id,
+        name: item.name,
+        store_id: item.store_id,
         size: {
           length: item.length,
           width: item.width,
@@ -50,14 +52,6 @@ module.exports.shelfController = async (ctx, next) => {
           z: item.z,
         },
       };
-      // 删除多余的数据
-      delete obj.length;
-      delete obj.width;
-      delete obj.height;
-      delete obj.x;
-      delete obj.y;
-      delete obj.z;
-      delete obj.goods_id;
       // 货架格子
       obj.shelf_grid = [];
       // 货架格子统计
