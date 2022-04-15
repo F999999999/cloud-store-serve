@@ -107,7 +107,7 @@ module.exports.addGoodsController = async (ctx, next) => {
     });
     ctx.body = {
       status: 200,
-      message: "添加成功",
+      message: "入库成功",
       data: {
         goods_id: result.insertId,
         name,
@@ -123,7 +123,7 @@ module.exports.addGoodsController = async (ctx, next) => {
   } else {
     ctx.body = {
       status: 400,
-      message: "添加失败",
+      message: "入库失败",
     };
   }
 };
@@ -299,13 +299,13 @@ module.exports.removeGoodsController = async (ctx, next) => {
 
     ctx.body = {
       status: 200,
-      message: "移除成功",
+      message: "出库成功",
       data,
     };
   } else {
     ctx.body = {
       status: 400,
-      message: "移除失败",
+      message: "出库失败",
     };
   }
 };
