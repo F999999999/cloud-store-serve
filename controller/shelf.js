@@ -22,6 +22,20 @@ module.exports.shelfController = async (ctx, next) => {
     emptyGrid: 0,
   };
   result.forEach((item) => {
+    // 当前仓库索引
+    let storeIndex = total.subTotal.findIndex(
+      (item2) => item2.store_id === item.store_id
+    );
+    if (storeIndex === -1) {
+      storeIndex =
+        total.subTotal.push({
+          store_id: item.store_id,
+          shelf: 0,
+          useGrid: 0,
+          emptyGrid: 0,
+        }) - 1;
+    }
+
     if (!data.find((item2) => item2.id === item.id)) {
       const obj = {
         ...item,
@@ -52,6 +66,7 @@ module.exports.shelfController = async (ctx, next) => {
         emptyGrid: 0,
       };
       data.push(obj);
+      total.subTotal[storeIndex].shelf++;
       total.shelf++;
     }
 
@@ -68,21 +83,6 @@ module.exports.shelfController = async (ctx, next) => {
       },
     });
 
-    // 当前仓库索引
-    let storeIndex = total.subTotal.findIndex(
-      (item2) => item2.store_id === item.store_id
-    );
-    if (storeIndex === -1) {
-      storeIndex =
-        total.subTotal.push({
-          store_id: item.store_id,
-          shelf: 0,
-          useGrid: 0,
-          emptyGrid: 0,
-        }) - 1;
-    }
-    // 当前仓库货架总数++
-    total.subTotal[storeIndex].shelf++;
     // 判断货架格子上是否有商品
     if (item.goods_id > 0) {
       // 已使用货架格子++
