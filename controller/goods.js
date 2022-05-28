@@ -10,6 +10,7 @@ const {
   getGoodsLog,
   getExpireGoods,
   getExpireGoodsTotal,
+  getGoodsLogByGoodsId,
 } = require("../model/goods");
 const { updateShelfGridGoods } = require("../model/shelf");
 
@@ -241,7 +242,7 @@ module.exports.removeGoodsController = async (ctx, next) => {
 
   // 判断参数是否为数组 如果不是数组则转为数组
   if (!Array.isArray(ids)) {
-    ids = ids.split(",");
+    ids = ids.toString().split(",");
   }
   ids = ids.map((id) => Number(id));
   // 获取商品当前位置信息
@@ -341,6 +342,74 @@ module.exports.getGoodsLogController = async (ctx, next) => {
     page_num: Number(page_num) || 1,
     page_size: Number(page_size) || 10,
   });
+
+  ctx.body = {
+    status: 200,
+    message: "获取商品日志成功",
+    data: result,
+  };
+};
+
+// 根据商品ID查询商品日志
+module.exports.getGoodsLogByGoodsIdController = async (ctx, next) => {
+  // 获取参数
+  const { goods_id } = ctx.request.query;
+  // 参赛校验
+  if (!goods_id) {
+    return (ctx.body = {
+      status: 400,
+      message: "商品ID不能为空",
+    });
+  }
+
+  // 查询商品日志
+  const dataList = await Promise.all(
+    goods_id
+      .split(",")
+      .map((id) => getGoodsLogByGoodsId({ goods_id: Number(id) }))
+  );
+
+  const result = [];
+  dataList.forEach((data) => {
+    if (data.length) {
+      result.push({
+        goods_id: data[0].goods_id,
+        goods_name: data[0].goods_name,
+        storage_time: data[0].storage_time,
+        takeout_time: data[0].takeout_time,
+        list: data.map((logData) => ({
+          id: logData.id,
+          before_store_id: logData.before_store_id,
+          before_store_name: logData.before_store_name,
+          before_shelf_id: logData.before_shelf_id,
+          before_shelf_name: logData.before_shelf_name,
+          before_shelf_grid_id: logData.before_shelf_grid_id,
+          before_shelf_grid_x: logData.before_shelf_grid_x,
+          before_shelf_grid_y: logData.before_shelf_grid_y,
+          before_shelf_grid_z: logData.before_shelf_grid_z,
+          now_store_id: logData.now_store_id,
+          now_store_name: logData.now_store_name,
+          now_shelf_id: logData.now_shelf_id,
+          now_shelf_name: logData.now_shelf_name,
+          now_shelf_grid_id: logData.now_shelf_grid_id,
+          now_shelf_grid_x: logData.now_shelf_grid_x,
+          now_shelf_grid_y: logData.now_shelf_grid_y,
+          now_shelf_grid_z: logData.now_shelf_grid_z,
+          operate_id: logData.operate_id,
+          operate_name: logData.operate_name,
+          operate_time: logData.operate_time,
+        })),
+      });
+    }
+  });
+
+  // 判断是否查询到商品日志
+  if (result.length <= 0) {
+    return (ctx.body = {
+      status: 400,
+      message: "没有查询到商品日志",
+    });
+  }
 
   ctx.body = {
     status: 200,

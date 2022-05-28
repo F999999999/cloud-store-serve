@@ -171,6 +171,41 @@ LIMIT ?,?
   );
 };
 
+// 根据商品ID查询商品日志
+module.exports.getGoodsLogByGoodsId = async ({ goods_id }) => {
+  return await query(
+    `
+SELECT 
+id,
+goods_id,
+(SELECT name FROM store_goods WHERE id = goods_id) AS goods_name,
+before_store_id,
+CASE WHEN before_store_id > 0 THEN (SELECT name FROM store WHERE id = before_store_id) ELSE null END AS before_store_name,
+before_shelf_id,
+CASE WHEN before_shelf_id > 0 THEN (SELECT name FROM store_shelf WHERE id = before_shelf_id) ELSE null END AS before_shelf_name,
+before_shelf_grid_id,
+CASE WHEN before_shelf_grid_id > 0 THEN (SELECT x FROM store_shelf_grid WHERE store_shelf_grid.goods_id = store_goods_log.goods_id) ELSE null END AS before_shelf_grid_x,
+CASE WHEN before_shelf_grid_id > 0 THEN (SELECT y FROM store_shelf_grid WHERE store_shelf_grid.goods_id = store_goods_log.goods_id) ELSE null END AS before_shelf_grid_y,
+CASE WHEN before_shelf_grid_id > 0 THEN (SELECT z FROM store_shelf_grid WHERE store_shelf_grid.goods_id = store_goods_log.goods_id) ELSE null END AS before_shelf_grid_z,
+now_store_id,
+CASE WHEN now_store_id > 0 THEN (SELECT name FROM store WHERE id = now_store_id) ELSE null END AS now_store_name,
+now_shelf_id,
+CASE WHEN now_shelf_id > 0 THEN (SELECT name FROM store_shelf WHERE id = now_shelf_id) ELSE null END AS now_shelf_name,
+now_shelf_grid_id,
+CASE WHEN now_shelf_grid_id > 0 THEN (SELECT x FROM store_shelf_grid WHERE store_shelf_grid.goods_id = store_goods_log.goods_id) ELSE null END AS now_shelf_grid_x,
+CASE WHEN now_shelf_grid_id > 0 THEN (SELECT y FROM store_shelf_grid WHERE store_shelf_grid.goods_id = store_goods_log.goods_id) ELSE null END AS now_shelf_grid_y,
+CASE WHEN now_shelf_grid_id > 0 THEN (SELECT z FROM store_shelf_grid WHERE store_shelf_grid.goods_id = store_goods_log.goods_id) ELSE null END AS now_shelf_grid_z,
+storage_time,
+takeout_time,
+operate_id,
+(SELECT username FROM sys_user WHERE id = operate_id) AS operate_name,operate_time
+FROM store_goods_log
+WHERE goods_id = ?
+`,
+    [goods_id]
+  );
+};
+
 // 获取临期商品
 module.exports.getExpireGoods = async ({
   store_id,

@@ -17,6 +17,7 @@ const {
   removeGoodsController,
   fuzzySearchGoodsController,
   getGoodsLogController,
+  getGoodsLogByGoodsIdController,
   getExpireGoodsController,
   getExpireGoodsTotalController,
 } = require("../controller/goods");
@@ -59,6 +60,9 @@ router.get("/search_goods", fuzzySearchGoodsController);
 
 // 获取商品日志
 router.get("/goods_log", getGoodsLogController);
+
+// 根据商品ID获取商品日志
+router.get("/goods_log_by_id", getGoodsLogByGoodsIdController);
 
 // 获取临期商品
 router.get("/expire_goods", getExpireGoodsController);
