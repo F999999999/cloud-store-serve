@@ -31,7 +31,7 @@ module.exports.register = async ({ username, password, isStates = 1 }) => {
  */
 module.exports.findUserInfo = async ({ username, password }) => {
   return await query(
-    "SELECT id,username,password,states FROM sys_user WHERE username= ? AND password = ?",
+    "SELECT id,username,password,post,states FROM sys_user WHERE username= ? AND password = ?",
     [username, password]
   );
 };

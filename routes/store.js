@@ -20,6 +20,8 @@ const {
   getGoodsLogByGoodsIdController,
   getExpireGoodsController,
   getExpireGoodsTotalController,
+  getGoodsLogControllerByPending,
+  confirmMoveGoods,
 } = require("../controller/goods");
 
 // 前缀
@@ -69,6 +71,12 @@ router.get("/expire_goods", getExpireGoodsController);
 
 // 获取临期商品统计
 router.get("/expire_goods_total", getExpireGoodsTotalController);
+
+// 获取待处理商品
+router.get("/pending_goods", getGoodsLogControllerByPending);
+
+// 确认商品移动
+router.post("/confirm_move_goods", confirmMoveGoods);
 
 // 导出路由
 module.exports = router;

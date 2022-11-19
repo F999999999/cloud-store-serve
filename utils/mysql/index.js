@@ -14,6 +14,11 @@ module.exports.query = (sql, payload) => {
       // 未连接
       if (err) throw err;
 
+      // 开发环境中打印sql语句
+      if (process.env.NODE_ENV === "development") {
+        console.log("[sql]", mysql.format(sql, payload));
+      }
+
       // 使用连接 发送SQL语句到数据库执行
       connection.query(sql, payload, function (error, results, fields) {
         // 释放连接

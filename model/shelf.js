@@ -87,6 +87,19 @@ module.exports.getEmptyShelfGrid = async ({ store_id, states = 1 }) => {
   );
 };
 
+// 获取指定货架格子的商品
+module.exports.getShelfGridIsGoodsByGridId = async ({
+  store_id,
+  shelf_id,
+  shelf_grid_id,
+  states = 1,
+}) => {
+  return await query(
+    `SELECT goods_id,x,y,z FROM store_shelf_grid WHERE store_id = ? AND shelf_id = ? AND shelf_grid_id = ? AND states = ?`,
+    [store_id, shelf_id, shelf_grid_id, states]
+  );
+};
+
 // 获取货架使用统计
 module.exports.getShelfTotal = async ({ shelf_id, states = 1 }) => {
   return await query(

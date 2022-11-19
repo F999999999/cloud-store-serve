@@ -11,8 +11,13 @@ const {
   getExpireGoods,
   getExpireGoodsTotal,
   getGoodsLogByGoodsId,
+  confirmMoveGoodsByLogId,
+  getGoodsLogByLogId,
 } = require("../model/goods");
-const { updateShelfGridGoods } = require("../model/shelf");
+const {
+  updateShelfGridGoods,
+  getShelfGridIsGoodsByGridId,
+} = require("../model/shelf");
 
 // 获取商品信息
 module.exports.getGoodsController = async (ctx, next) => {
@@ -108,7 +113,7 @@ module.exports.addGoodsController = async (ctx, next) => {
     });
     ctx.body = {
       status: 200,
-      message: "入库成功",
+      message: "入库成功，等待搬运",
       data: {
         goods_id: result.insertId,
         name,
@@ -149,6 +154,18 @@ module.exports.moveGoodsController = async (ctx, next) => {
 
   // 获取商品当前位置信息
   const goodsPosition = await getGoodsPosition({ ids: [id] });
+
+  // 判断商品是否还有未完成的移动任务
+  const goodsLog = await getGoodsLogByGoodsId({
+    goods_id: goodsPosition[0].id,
+  });
+  if (goodsLog.find((v) => v.execute_time === null)?.length > 0) {
+    return (ctx.body = {
+      status: 400,
+      message: "该商品有未完成的调度任务",
+    });
+  }
+
   // 判断该位置是否已经有商品
   const goods = await getGoodsByPosition({
     store_id: store_id ? store_id : goodsPosition[0].store_id,
@@ -161,6 +178,18 @@ module.exports.moveGoodsController = async (ctx, next) => {
       message: "该位置已有商品，请换个位置",
     });
   }
+  // 获取空货架格子
+  const shelfGridGoods = await getShelfGridIsGoodsByGridId({
+    store_id: store_id ? store_id : goodsPosition[0].store_id,
+    shelf_id: shelf_id ? shelf_id : goodsPosition[0].shelf_id,
+    shelf_grid_id,
+  });
+  if (shelfGridGoods[0].goods_id !== null) {
+    return (ctx.body = {
+      status: 400,
+      message: "该位置的商品转移请求还未完成，请换个位置",
+    });
+  }
   if (goodsPosition.length > 0) {
     // 修改商品位置信息
     const result = await updateGoodsPosition({
@@ -169,9 +198,9 @@ module.exports.moveGoodsController = async (ctx, next) => {
       shelf_id: shelf_id ? shelf_id : goodsPosition[0].shelf_id,
       shelf_grid_id,
     });
-    // 清除旧货架格子的商品
+    // 设置旧货架格子为占用状态
     const oldGoodsResult = await updateShelfGridGoods({
-      goods_id: null,
+      goods_id: 0,
       store_id: goodsPosition[0].store_id,
       shelf_id: goodsPosition[0].shelf_id,
       shelf_grid_id: goodsPosition[0].shelf_grid_id,
@@ -203,7 +232,7 @@ module.exports.moveGoodsController = async (ctx, next) => {
       });
       ctx.body = {
         status: 200,
-        message: "移动成功",
+        message: "移动成功，等待搬运",
         data: {
           goods_id: Number(id),
           before_store_id: goodsPosition[0].store_id,
@@ -300,7 +329,7 @@ module.exports.removeGoodsController = async (ctx, next) => {
 
     ctx.body = {
       status: 200,
-      message: "出库成功",
+      message: "出库成功，等待搬运",
       data,
     };
   } else {
@@ -458,4 +487,67 @@ module.exports.getExpireGoodsTotalController = async (ctx, next) => {
     message: "获取临期商品统计成功",
     data: { list: result, total },
   };
+};
+
+// 获取待处理商品
+module.exports.getGoodsLogControllerByPending = async (ctx, next) => {
+  // 获取参数
+  const { store_id, page_num, page_size } = ctx.request.query;
+
+  const result = await getGoodsLog({
+    store_id: Number(store_id) || null,
+    page_num: Number(page_num) || 1,
+    page_size: Number(page_size) || 100,
+  });
+
+  ctx.body = {
+    status: 200,
+    message: "获取待处理商品成功",
+    data: result.filter((v) => v.execute_time === null).reverse(),
+  };
+};
+
+// 确认商品移动
+module.exports.confirmMoveGoods = async (ctx, next) => {
+  // 获取参数
+  const { log_id } = ctx.request.body;
+
+  //获取商品当前日志数据
+  const goodsLog = await getGoodsLogByLogId({ log_id: Number(log_id) });
+  if (goodsLog.length > 0) {
+    const confirmResult = await confirmMoveGoodsByLogId({
+      log_id: Number(log_id),
+      execute_id: ctx.request.docodeToken.id,
+      execute_time: Math.round(new Date() / 1000),
+    });
+
+    // 解除旧货架格子的占用状态
+    const relieveOldGoodsResult = await updateShelfGridGoods({
+      goods_id: null,
+      store_id: goodsLog[0].before_store_id,
+      shelf_id: goodsLog[0].before_shelf_id,
+      shelf_grid_id: goodsLog[0].before_shelf_grid_id,
+    });
+    if (
+      confirmResult.affectedRows > 0 &&
+      relieveOldGoodsResult.affectedRows > 0
+    ) {
+      ctx.body = {
+        status: 200,
+        message: "商品处理成功",
+        data: goodsLog,
+      };
+    } else {
+      ctx.body = {
+        status: 400,
+        message: "商品处理失败",
+        data: goodsLog,
+      };
+    }
+  } else {
+    return (ctx.body = {
+      status: 400,
+      message: "没有查询到商品日志",
+    });
+  }
 };

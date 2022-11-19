@@ -86,7 +86,7 @@ module.exports.getGoodsPosition = async ({ ids, states = 1 }) => {
   const sql = ids.reduce((prev, curr, i, arr) => {
     payload.push(curr);
     return prev + "id = ?" + (i === arr.length - 1 ? ";" : " OR ");
-  }, `SELECT *,store_id,shelf_id,shelf_grid_id FROM store_goods WHERE states = ? AND `);
+  }, `SELECT id,store_id,shelf_id,shelf_grid_id FROM store_goods WHERE states = ? AND `);
   return await query(sql, payload);
 };
 
@@ -161,7 +161,11 @@ CASE WHEN now_shelf_grid_id > 0 THEN (SELECT z FROM store_shelf_grid WHERE store
 storage_time,
 takeout_time,
 operate_id,
-(SELECT username FROM sys_user WHERE id = operate_id) AS operate_name,operate_time 
+(SELECT username FROM sys_user WHERE id = operate_id) AS operate_name,
+operate_time,
+execute_id,
+(SELECT username FROM sys_user WHERE id = execute_id) AS operate_name,
+execute_time 
 FROM store_goods_log 
 ${store_id ? "WHERE before_store_id = ? OR now_store_id = ? " : ""}
 order by operate_time desc 
@@ -198,11 +202,54 @@ CASE WHEN now_shelf_grid_id > 0 THEN (SELECT z FROM store_shelf_grid WHERE store
 storage_time,
 takeout_time,
 operate_id,
-(SELECT username FROM sys_user WHERE id = operate_id) AS operate_name,operate_time
+(SELECT username FROM sys_user WHERE id = operate_id) AS operate_name,
+operate_time,
+execute_id,
+(SELECT username FROM sys_user WHERE id = execute_id) AS operate_name,
+execute_time 
 FROM store_goods_log
 WHERE goods_id = ?
 `,
     [goods_id]
+  );
+};
+
+// 根据日志ID查询商品日志
+module.exports.getGoodsLogByLogId = async ({ log_id }) => {
+  return await query(
+    `
+SELECT 
+id,
+goods_id,
+(SELECT name FROM store_goods WHERE id = goods_id) AS goods_name,
+before_store_id,
+CASE WHEN before_store_id > 0 THEN (SELECT name FROM store WHERE id = before_store_id) ELSE null END AS before_store_name,
+before_shelf_id,
+CASE WHEN before_shelf_id > 0 THEN (SELECT name FROM store_shelf WHERE id = before_shelf_id) ELSE null END AS before_shelf_name,
+before_shelf_grid_id,
+CASE WHEN before_shelf_grid_id > 0 THEN (SELECT x FROM store_shelf_grid WHERE store_shelf_grid.goods_id = store_goods_log.goods_id) ELSE null END AS before_shelf_grid_x,
+CASE WHEN before_shelf_grid_id > 0 THEN (SELECT y FROM store_shelf_grid WHERE store_shelf_grid.goods_id = store_goods_log.goods_id) ELSE null END AS before_shelf_grid_y,
+CASE WHEN before_shelf_grid_id > 0 THEN (SELECT z FROM store_shelf_grid WHERE store_shelf_grid.goods_id = store_goods_log.goods_id) ELSE null END AS before_shelf_grid_z,
+now_store_id,
+CASE WHEN now_store_id > 0 THEN (SELECT name FROM store WHERE id = now_store_id) ELSE null END AS now_store_name,
+now_shelf_id,
+CASE WHEN now_shelf_id > 0 THEN (SELECT name FROM store_shelf WHERE id = now_shelf_id) ELSE null END AS now_shelf_name,
+now_shelf_grid_id,
+CASE WHEN now_shelf_grid_id > 0 THEN (SELECT x FROM store_shelf_grid WHERE store_shelf_grid.goods_id = store_goods_log.goods_id) ELSE null END AS now_shelf_grid_x,
+CASE WHEN now_shelf_grid_id > 0 THEN (SELECT y FROM store_shelf_grid WHERE store_shelf_grid.goods_id = store_goods_log.goods_id) ELSE null END AS now_shelf_grid_y,
+CASE WHEN now_shelf_grid_id > 0 THEN (SELECT z FROM store_shelf_grid WHERE store_shelf_grid.goods_id = store_goods_log.goods_id) ELSE null END AS now_shelf_grid_z,
+storage_time,
+takeout_time,
+operate_id,
+(SELECT username FROM sys_user WHERE id = operate_id) AS operate_name,
+operate_time,
+execute_id,
+(SELECT username FROM sys_user WHERE id = execute_id) AS operate_name,
+execute_time 
+FROM store_goods_log
+WHERE id = ?
+`,
+    [log_id]
   );
 };
 
@@ -238,5 +285,17 @@ FROM store_goods
 WHERE states = 1 
 GROUP BY store_id
 `
+  );
+};
+
+// 确认商品移动
+module.exports.confirmMoveGoodsByLogId = async ({
+  log_id,
+  execute_id,
+  execute_time = Math.round(new Date() / 1000),
+}) => {
+  return await query(
+    `UPDATE store_goods_log SET execute_id = ?, execute_time = ? WHERE id = ?`,
+    [execute_id, execute_time, log_id]
   );
 };

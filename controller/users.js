@@ -78,6 +78,7 @@ module.exports.login = async (ctx, next) => {
           id: user[0].id,
           username: user[0].username,
           token,
+          post: user[0].post,
         },
       };
     } else {
